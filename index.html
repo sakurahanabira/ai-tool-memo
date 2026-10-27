@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIツール比較メモ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container">
+      <div class="header-content">
+        <div>
+          <span class="badge">AI Tool Comparison Memo</span>
+          <h1>AIツール比較メモ</h1>
+          <p class="subtitle">検討中のAIツールの月額料金・用途を整理・比較できる管理ツール</p>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="downloadCsvBtn" class="btn btn-secondary" title="現在のデータをCSV形式で保存します">
+            📥 CSVダウンロード
+          </button>
+          <button type="button" id="resetDataBtn" class="btn btn-outline-danger" title="初期データ（3件）の状態に戻します">
+            ↺ 初期状態へリセット
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-layout">
+    <!-- 入力・編集フォームセクション -->
+    <section class="card form-section" aria-labelledby="formHeading">
+      <div class="card-header">
+        <h2 id="formHeading">ツールを追加</h2>
+        <span id="editModeBadge" class="edit-mode-badge" hidden>編集モード</span>
+      </div>
+
+      <form id="toolForm" novalidate>
+        <input type="hidden" id="editingId" value="">
+
+        <div id="errorAlert" class="error-alert" role="alert" aria-live="assertive" hidden>
+          <strong>入力内容をご確認ください：</strong>
+          <ul id="errorList"></ul>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="toolName">ツール名 <span class="required">必須</span></label>
+            <input
+              type="text"
+              id="toolName"
+              name="name"
+              placeholder="例：ChatGPT Plus"
+              maxlength="100"
+              autocomplete="off"
+              required
+            >
+            <small class="help-text">※既存のツールと同じ名前は登録できません</small>
+          </div>
+
+          <div class="form-group">
+            <label for="toolMonthly">月額料金（円） <span class="required">必須</span></label>
+            <input
+              type="number"
+              id="toolMonthly"
+              name="monthly"
+              placeholder="例：3000（無料は 0）"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              required
+            >
+            <small class="help-text">※0円以上の整数を入力してください</small>
+          </div>
+
+          <div class="form-group form-group-full">
+            <label for="toolMemo">用途・メモ <span class="required">必須</span></label>
+            <input
+              type="text"
+              id="toolMemo"
+              name="memo"
+              placeholder="例：文章作成・要約・アイデア出し"
+              maxlength="200"
+              autocomplete="off"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="submitBtn" class="btn btn-primary">＋ 追加する</button>
+          <button type="button" id="cancelEditBtn" class="btn btn-ghost" hidden>キャンセル</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 検索・並べ替え・一覧表示セクション -->
+    <section class="card list-section" aria-labelledby="listHeading">
+      <div class="list-header">
+        <div class="list-title-wrap">
+          <h2 id="listHeading">登録ツール一覧</h2>
+          <div class="summary-badges">
+            <span class="summary-pill">表示件数：<strong id="countDisplay">0</strong> 件</span>
+            <span class="summary-pill">月額合計：<strong id="totalMonthlyDisplay">¥0</strong></span>
+          </div>
+        </div>
+
+        <div class="filter-controls">
+          <div class="search-box">
+            <label for="searchInput" class="sr-only">名前・メモで検索</label>
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="🔍 名前・メモで部分一致検索..."
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="sort-box">
+            <label for="sortSelect" class="sort-label">並べ替え：</label>
+            <select id="sortSelect" aria-label="料金の並べ替え">
+              <option value="default">登録順</option>
+              <option value="asc">料金の昇順（安い順）</option>
+              <option value="desc">料金の降順（高い順）</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="statusMessage" class="status-toast" role="status" aria-live="polite" hidden></div>
+
+      <div class="table-responsive">
+        <table class="tool-table" aria-label="AIツール比較一覧">
+          <thead>
+            <tr>
+              <th scope="col" class="col-name">ツール名</th>
+              <th scope="col" class="col-monthly">
+                <button type="button" id="tableSortBtn" class="table-sort-btn" title="クリックして料金順に並べ替え">
+                  月額料金 <span id="sortIcon" class="sort-icon">↕</span>
+                </button>
+              </th>
+              <th scope="col" class="col-memo">用途・メモ</th>
+              <th scope="col" class="col-actions">操作</th>
+            </tr>
+          </thead>
+          <tbody id="toolTableBody">
+            <!-- JavaScriptで安全に描画されます -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <p id="emptyStateText">該当するツールが見つかりません。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <p>データはブラウザの <code>localStorage</code> に自動保存されます。</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
